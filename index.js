@@ -1,4 +1,4 @@
-var debug = require("debug")("dme");
+var debug = require("debug")("dactic");
 var express = require('express');
 var router = express.Router();
 var URL = require("url");
@@ -45,6 +45,7 @@ serializationMiddleware = [
 	function(req,res,next){
 		if (res.results) {
 			res.media = findBestMedia(req.headers.accept || "text/json",res.results,{req:req,res:res});	
+			console.log("Serialization: ", res.media);
 			res.set("content-type",res.media['content-type']);
 			debug("Serialize to ", res.media['content-type']);
 			var serialized = res.media.serialize(res.results, {req:req,res:res});
@@ -256,6 +257,7 @@ module.exports = function(dataModel){
 
 	router.get('/:model/', [
 		function(req,res,next){
+			console.log("Query Route");
 			req.apiModel = req.params.model;
 			req.templateId = req.apiModel;
 			req.templateStyle = 'list';

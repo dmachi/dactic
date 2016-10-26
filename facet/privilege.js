@@ -8,10 +8,12 @@ var introspect = require("introspect");
 
 var Facet = module.exports =  function(wrapper){
 	EventEmitter.call(this);
+
 	for (prop in wrapper) {
 		this[prop]=wrapper[prop];
 	}
 
+	console.log("Facet Model: ", this.model);
 	if (this.model) { this.init(); }
 }
 

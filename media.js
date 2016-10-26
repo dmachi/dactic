@@ -1,5 +1,5 @@
 var MediaHandlers=[];
-var debug = require("debug")("dme:media");
+var debug = require("debug")("dactic:media");
 
 module.exports.addMedia = function(media){
 	debug("Add Media: ", media, typeof media);
@@ -34,14 +34,19 @@ module.exports.findBestMedia = function(type,results,options){
 	var media;
 	var matchConf=0;
 	debug("Find Best Media: ", type);
+	console.log("MediaHandlers: ", MediaHandlers);
 	MediaHandlers.some(function(m){
+		console.log("Inspecting Media Handler: ", m);
 		if (m.checkMedia){
+			console.log("Call serializer checkMedia()");
 			var conf = m.checkMedia(type,results,options);
+			console.log("  checkMedia Results: ", conf);
 			if (conf > matchConf){
 				media=m;
 				matchConf=conf;
 			}
 		}else {
+			console.log("Searching accepts....");
 			Object.keys(accepts).some(function(qscore){
 				debug("Checking accepts with qscore: ", qscore,m['content-type'], "Match: ", accepts[qscore].indexOf(m['content-type']) );
 				if (accepts[qscore].some(function(t){

@@ -3,6 +3,7 @@ var EventEmitter = require('events').EventEmitter;
 var util=require("util");
 
 var Store = module.exports = function(id, options) {
+	console.log("StoreBase ctor: ", id, options);
 	EventEmitter.call(this);
 	this.id = id;
 	this.options=options;

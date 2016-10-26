@@ -1,4 +1,4 @@
-var debug = require("debug")("dme:datamodel");
+var debug = require("debug")("dactic:datamodel");
 var util = require("util");
 var events = require("events");
 var when = require("promised-io/promise").when;

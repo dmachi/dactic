@@ -3,7 +3,7 @@ var util=require("util");
 
 
 var Facet = module.exports = function(){
-	PrivilegeFacet.call(this);
+	PrivilegeFacet.apply(this,arguments);
 }		
 
 util.inherits(Facet,PrivilegeFacet);

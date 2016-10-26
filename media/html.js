@@ -1,4 +1,4 @@
-var debug = require("debug")("dme:media:html");
+var debug = require("debug")("dactic:media:html");
 var defer = require("promised-io/promise").defer;
 var when = require("promised-io/promise").when;
 var Path = require("path");

@@ -1,4 +1,4 @@
-var debug = require("debug")("dme:model")
+var debug = require("debug")("dactic:model")
 var errors = require("./errors");
 var when = require("promised-io/promise").when;
 var defer = require("promised-io/promise").defer;
@@ -197,6 +197,7 @@ Model.prototype.get=function(id,opts /*expose*/){
 }
 
 Model.prototype.query=function(query, opts /*expose*/){
+	console.log("BaseModel query()", query);
 	return this.store.query(query, opts);
 }
 
