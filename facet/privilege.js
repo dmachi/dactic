@@ -132,7 +132,7 @@ Facet.prototype.getSchema=function(){
 			//	On a non-permissive facet, only those properties listed are available.
 						
 			// 	object: { foo: {...}, bar: {...} } 	
-			if (self.properties && (self.properties != "*")) {
+			if (self.properties && (self.properties != "*") && schema && schema.properties) {
 				debug("Mapping Schema Properties");	
 				Object.keys(schema.properties).forEach(function(prop){
 					if (self.properties instanceof Array) {
