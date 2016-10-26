@@ -1,6 +1,7 @@
 var parser = require("rql/parser");
 var EventEmitter = require('events').EventEmitter;
 var util=require("util");
+var errors = require("./errors");
 
 var Store = module.exports = function(id, options) {
 	console.log("StoreBase ctor: ", id, options);
@@ -18,21 +19,26 @@ Store.prototype.setSchema=function(schema){
 
 Store.prototype.parseQuery=function(query,opts){
 	// IMPLEMENT IN SUBCLASS		
+	return new errors.NotImplemented();
 }
 
 Store.prototype.get=function(id,opts){
 	// IMPLEMENT IN SUBCLASS		
+	return new errors.NotImplemented();
 }
 
 Store.prototype.query=function(query, opts){
 	// IMPLEMENT IN SUBCLASS		
+	return new errors.NotImplemented();
 }
 
 Store.prototype.put=function(obj, opts){
 	// IMPLEMENT IN SUBCLASS		
+	return new errors.NotImplemented();
 }
 
 Store.prototype["delete"]=function(id, opts){
 	// IMPLEMENT IN SUBCLASS		
+	return new errors.NotImplemented();
 }
 

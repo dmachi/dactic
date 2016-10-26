@@ -176,7 +176,7 @@ Facet.prototype.get=function(id,opts /*expose*/){
 	if (this.permissive) {
 		return this.model.get(id,opts);
 	}
-	throw new Error("Not Allowed");
+	throw new errors.NotFound();
 }
 
 Facet.prototype.query=function(query, opts /*expose*/){
@@ -184,26 +184,26 @@ Facet.prototype.query=function(query, opts /*expose*/){
 	if (this.permissive) {
 		return this.model.query(query,opts);
 	}
-	throw new Error("Not Allowed");
+	throw new errors.NotFound();
 }
 
 Facet.prototype.put=function(obj, opts /*expose*/){
 	if (this.permissive) {
 		return this.model.put(obj,opts);
 	}
-	throw new Error("Not Allowed");
+	throw new errors.NotFound();
 }
 
 Facet.prototype.post=function(obj, opts /*expose*/){
 	if (this.permissive) {
 		return this.model.post(obj,opts);
 	}
-	throw new Error("Not Allowed");
+	throw new errors.NotFound();
 }
 
 Facet.prototype['delete']=function(id, opts /*expose*/){
 	if (this.permissive) {
 		return this.model['delete'](id,opts);
 	}
-	throw new Error("Not Allowed");
+	throw new errors.NotFound();
 }
