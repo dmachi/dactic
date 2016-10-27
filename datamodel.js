@@ -88,20 +88,20 @@ function DataModel(options) {
 		var acl = req.apiPrivilegeFacet || "public";
 		var opts = {req: req, res: res}
 		debug("Get Executor: ", acl, req.apiModel, req.apiMethod, req.apiParams);
-		console.log("Priv Facet: ", acl, "self.privilegeFacet[req.apiModel] exists ", !!self.privilegeFacet[req.apiModel][acl], "method type: ", typeof self.privilegeFacet[req.apiModel][acl][req.apiMethod] );
-		console.log((typeof self.privilegeFacet[req.apiModel][acl][req.apiMethod]== "boolean" )?("Boolean Facet Method: " + self.privilegeFacet[req.apiModel][acl][req.apiMethod]):"");
+	//	console.log("Priv Facet: ", acl, "self.privilegeFacet[req.apiModel] exists ", !!self.privilegeFacet[req.apiModel][acl], "method type: ", typeof self.privilegeFacet[req.apiModel][acl][req.apiMethod] );
+		//((typeof self.privilegeFacet[req.apiModel][acl][req.apiMethod]== "boolean" )?("Boolean Facet Method: " + self.privilegeFacet[req.apiModel][acl][req.apiMethod]):"");
 		
 
-		console.log("Facet: ", self.privilegeFacet[req.apiModel][acl]);
+		//("Facet: ", self.privilegeFacet[req.apiModel][acl]);
 		if (acl!="model" && self.privilegeFacet[req.apiModel] && self.privilegeFacet[req.apiModel][acl] && self.privilegeFacet[req.apiModel][acl][req.apiMethod]){
 			req.executor = function(params) {
 				params.push(opts);
 				debug("call facet executor::", req.apiModel, acl, req.apiMethod, params );
-				console.log("params are array: ", params instanceof Array, "Params: ", params);
+				//("params are array: ", params instanceof Array, "Params: ", params);
 				if (self.privilegeFacet[req.apiModel][acl][req.apiMethod] && typeof self.privilegeFacet[req.apiModel][acl][req.apiMethod]=="function"){
 					return self.privilegeFacet[req.apiModel][acl][req.apiMethod].apply(self.privilegeFacet[req.apiModel][acl], params);
 				}else{
-					console.log("Call Model Executor because of boolean privilege facet prop");
+					//("Call Model Executor because of boolean privilege facet prop");
 					return self.model[req.apiModel][req.apiMethod].apply(self.model[req.apiModel],params);	
 				}
 			}
@@ -137,9 +137,9 @@ function DataModel(options) {
 //			if (!results){
 //				next("route");
 //			}else{
-			console.log("Results: ", results);
+			//("Results: ", results);
 				when(results, function(results){
-					console.log("results: ", results);
+					//("results: ", results);
 					res.results = results;
 					if (req.apiMethod=="query" && results && results.metadata) {
 						debug("Results.metadata: ", results.metadata);

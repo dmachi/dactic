@@ -45,7 +45,7 @@ serializationMiddleware = [
 	function(req,res,next){
 		if (res.results) {
 			res.media = findBestMedia(req.headers.accept || "text/json",res.results,{req:req,res:res});	
-			console.log("Serialization: ", res.media);
+			// console.log("Serialization: ", res.media);
 			res.set("content-type",res.media['content-type']);
 			debug("Serialize to ", res.media['content-type']);
 			var serialized = res.media.serialize(res.results, {req:req,res:res});
@@ -257,7 +257,7 @@ module.exports = function(dataModel){
 
 	router.get('/:model/', [
 		function(req,res,next){
-			console.log("Query Route");
+			//("Query Route");
 			req.apiModel = req.params.model;
 			req.templateId = req.apiModel;
 			req.templateStyle = 'list';
@@ -265,7 +265,7 @@ module.exports = function(dataModel){
 			debug("req.query: ", req.query);
 			req.apiParams=req.query?[req.query]:[];
 			req.apiOptions = {};
-			console.log("Query /:model/", req.params.model, req.templateId, req.templateStyle, req.apiParams);
+			//("Query /:model/", req.params.model, req.templateId, req.templateStyle, req.apiParams);
 			next();
 		},
 		dataModel.middleware,
@@ -277,7 +277,7 @@ module.exports = function(dataModel){
 		bodyParser.json({limit: 20000, type: "application/jsonrpc+json"}),
 		bodyParser.json({limit: 20000}),
 		function(req,res,next) {
-			console.log("DME post /:model/", req.body);	
+			//("DME post /:model/", req.body);	
 			req.apiModel = req.params.model;
 			if (req.body.jsonrpc){
 				req.headers.accept="application/json+jsonrpc";
@@ -295,7 +295,7 @@ module.exports = function(dataModel){
 				req.apiOptions = {};
 			}
 
-			console.log("req.apiParams: ", req.apiParams, "is Array: ", req.apiParams instanceof Array);
+			//("req.apiParams: ", req.apiParams, "is Array: ", req.apiParams instanceof Array);
 			next();
 		},
 		dataModel.middleware,

@@ -16,11 +16,21 @@ var Model = module.exports =  function(store,opts){
 
 	this.store = store;
 	this.opts = opts;
+
+	this.init();
 }
 
-Model.prototype.generateSchema=true;
+util.inherits(Model, EventEmitter);
+
+Model.prototype.generateSchema=false;
 Model.prototype.rpc=false;
 Model.prototype.allowedOperators="*";
+
+Model.prototype.init = function(){
+	if (this.schema && this.store){
+		this.store.setSchema(this.schema);
+	}
+}
 
 Model.prototype.getSchema=function(){
 	if (this.generateSchema && this.store && this.store.getSchema){
@@ -92,26 +102,37 @@ Model.prototype.getServiceDescription=function(){
 	return this.serviceDescription;
 }
 
-Model.prototype.updateObject=function(object,updated){
+Model.prototype.mixinObject=function(object,updated){
 	var _self=this;
 	var out = {};
 	if (object.id) { out.id = object.id }
 	if (!this.schema || !this.schema.properties) { throw Error("Missing Schema Properties"); }
 	Object.keys(this.schema.properties).forEach(function(prop){
 		var propDef = _self.schema.properties[prop];
+		if (_self.schema.required && _self.schema.required.indexOf(prop)>=0){
+			propDef.optional = false;
+		}else{
+			propDef.optional = true;
+		}
+
 		//debug("prop: ", prop, "propDef: ", propDef);
 		if (!prop || (prop=="id") || (typeof propDef=="function")) { return; }
-		if ((propDef.type=="readonly")&&(typeof object[prop]!="undefined")){
+		if ((propDef.readonly)&&(typeof object[prop]!="undefined")){
 			out[prop]=object[prop];
 		}
 	
-		if (propDef.type=="transient"){
+		if (propDef.transient){
 			return;
 		}
 
+
 		if ((typeof object[prop]=="undefined") && (typeof updated[prop]=='undefined') && (!propDef.optional) ){
-			if (propDef['default']) { out[prop]=propDef['default'];  return }
-			throw new errors.NotAcceptable("'" + prop + "' is a required property.");
+			console.log("Missing Required Property: ", propDef);
+			if (typeof propDef['default'] != "undefined") { 
+				out[prop]=propDef['default'];  
+			}else{
+				throw new errors.NotAcceptable("'" + prop + "' is a required property.");
+			}
 		}else if (!updated[prop] && object[prop]) {
 			out[prop]=object[prop];
 		}else if (updated[prop]){
