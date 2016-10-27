@@ -274,6 +274,7 @@ module.exports = function(dataModel){
 
 
 	router.post('/:model[/]',[
+		bodyParser.urlencoded(),
 		bodyParser.json({limit: 20000, type: "application/jsonrpc+json"}),
 		bodyParser.json({limit: 20000}),
 		function(req,res,next) {
