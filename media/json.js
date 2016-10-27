@@ -10,7 +10,7 @@ addMedia({
 addMedia({
 	"content-type": "text/json",
 	serialize: function(results,options){
-		return JSON.stringify(results||results);
+		return JSON.stringify(results||results,null,4);
 	}
 })
 
