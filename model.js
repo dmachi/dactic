@@ -126,11 +126,13 @@ Model.prototype.mixinObject=function(object,updated){
 		}
 
 
-		if ((typeof object[prop]=="undefined") && (typeof updated[prop]=='undefined') && (!propDef.optional) ){
+		if ((typeof object[prop]=="undefined") && (typeof updated[prop]=='undefined') ){
 			console.log("Missing Required Property: ", propDef);
 			if (typeof propDef['default'] != "undefined") { 
 				out[prop]=propDef['default'];  
-			}else{
+			}
+
+			if (!propDef.optional && typeof out[prop]=="undefined"){
 				throw new errors.NotAcceptable("'" + prop + "' is a required property.");
 			}
 		}else if (!updated[prop] && object[prop]) {

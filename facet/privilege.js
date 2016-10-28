@@ -43,7 +43,7 @@ Facet.prototype.init=function(){
 			if (this[method] === true){
 				this[method] = function(){
 					console.log("Priv Facet call model method with args: ", arguments);
-					return this.model[method].call(this.model, arguments);	
+					return this.model[method].apply(this.model, arguments);	
 				}
 			}else if (typeof this[method]=='function'){
 				var params = introspect(this[method])

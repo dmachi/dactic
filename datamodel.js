@@ -144,7 +144,7 @@ function DataModel(options) {
 					if (req.apiMethod=="query" && results && results.metadata) {
 						debug("Results.metadata: ", results.metadata);
 						var start = parseInt(results.metadata.start || 0);
-						var end = start + results.results.length;
+						var end = start + ((results && results.results)?results.results.length:0);
 						var tr = results.metadata.totalRows;
 	
 						var cr = "items " + start + "-" + end + "/" + tr; 
