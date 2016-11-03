@@ -3,6 +3,7 @@ var addMedia = require("../media").addMedia;
 addMedia({
 	"content-type": "application/json+jsonrpc",
 	serialize: function(results,options){
-		return JSON.stringify({id: 1,result: results.results});
+		console.log("JSON RPC Serialize Results: ", results);
+		return JSON.stringify({id: 1,result: results.getData()});
 	}
 })

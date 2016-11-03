@@ -47,10 +47,13 @@ serializationMiddleware = [
 			res.media = findBestMedia(req.headers.accept || "text/json",res.results,{req:req,res:res});	
 			// console.log("Serialization: ", res.media);
 			res.set("content-type",res.media['content-type']);
-			debug("Serialize to ", res.media['content-type']);
+			debug("Serialize to ", res.media['content-type'], res.results.getData());
 			var serialized = res.media.serialize(res.results, {req:req,res:res});
 			when(serialized, function(out) {
 				res.end(out);
+			}, function(err){
+				console.log("Error in serializer: ", err);
+				next(err);
 			});
 		}else{
 			debug("No Results Found.");

@@ -30,6 +30,7 @@ Facet.prototype.init=function(){
 	var services = this._smd.services;
 	if (this.permissive) {
 		Object.keys(services).forEach(function(method){
+			console.log("Permissive Methods: ", method);
 			if (typeof this[method] == 'undefined'){
 				this[method] = function(){
 					console.log("Facet Wrapper Arguments for " + method + ":", arguments);

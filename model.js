@@ -74,8 +74,10 @@ Model.prototype.getServiceDescription=function(){
 	}
 
 	for (var prop in this) {
+		console.log("Building SMD Method: ", prop);
 		if (typeof this[prop] == 'function') {
 			var params = introspect(this[prop])
+			console.log("    Method Params: ", params);
 			if (params[params.length-1]=="/*expose*/") {
 				smd.services[prop] = {
 					type: "method",
@@ -98,6 +100,8 @@ Model.prototype.getServiceDescription=function(){
 			}	
 		}
 	}
+
+	console.log("SERVICE DESC: ", smd);
 	this.serviceDescription = smd;
 	return this.serviceDescription;
 }
