@@ -132,14 +132,14 @@ function DataModel(options) {
 				debug("Invalid Executor");
 				return next(new Error("Not Found"));
 			}
-			debug("Call Executor");
+			debug("Call Executor", req.apiParams);
 			var results = req.executor(req.apiParams);
 //			if (!results){
 //				next("route");
 //			}else{
 			//("Results: ", results);
 				when(results, function(results){
-					//("results: ", results);
+					console.log("dataModel results handler results: ", results);
 					res.results = results;
 					if (req.apiMethod=="query" && results && results.metadata) {
 						debug("Results.metadata: ", results.metadata);

@@ -5,7 +5,9 @@ var defer = require("promised-io/promise").defer;
 var EventEmitter = require('events').EventEmitter;
 var util=require("util");
 var introspect = require("introspect");
-
+var uuid = require("uuid");
+var AJV = require("ajv");
+var jsonpatch = require("json-patch");
 
 var Model = module.exports =  function(store,opts){
 	EventEmitter.call(this);
@@ -229,11 +231,82 @@ Model.prototype.query=function(query, opts /*expose*/){
 }
 
 Model.prototype.put=function(obj, opts /*expose*/){
-	return this.store.put(obj,opts);
+//	console.log("base model put()", obj);
+
+	var schema = this.getSchema();
+
+	if (schema){
+//		console.log("Schema: ", schema);
+//		console.log("obj: ", obj);
+		try {
+
+			var ajv = new AJV({
+		                v5: true,
+		                allErrors: true,
+		                verbose: true,
+				useDefaults: true
+		        });
+
+			console.log("call validate");
+		        var valid = ajv.validate(schema,obj);
+			console.log("Valid: ", valid);
+		} catch(err){
+			console.log("Error Running Validator", err);
+			throw Error("Error Running Validator");
+		}
+
+		if (!valid){
+			console.log("ajv.errors: ", ajv.errors);
+			console.log("ajv.errorsText()", ajv.errorsText());
+
+			throw Error(ajv.errorsText());
+		}
+	}else{
+		console.log("No Schema");
+	}
+
+	console.log("put with overwrite: ", opts.overwrite);
+	return when(this.store.put(obj,opts), function(results){
+		console.log("this.store.put results: ", results);
+		return results;
+	});
 }
 
 Model.prototype.post=function(obj, opts /*expose*/){
-	return this.store.post(obj,opts);
+	var _self=this;
+	opts=opts||{}
+	console.log("Model Post: ", obj);
+	if (obj && !obj.id){
+		if (opts && opts.id) {
+			obj.id = opts.id;
+		}else{
+			obj.id = uuid.v4();
+		}
+		
+		return when(_self.put(obj,opts), function(res){
+			return res;
+		},function(err){
+			console.log("Error Creating User: ", err);
+		});
+
+	}else{
+		return new errors.BadRequest();
+	}
+}
+
+Model.prototype.patch=function(id,patch,opts /*expose*/){
+	var _self=this;
+	return when(_self.get(id), function(result){
+		var obj = result.getData();
+		console.log("Patching: ", obj);
+        	patch.forEach(function(p){
+                	jsonpatch.apply(obj,p);
+        	})		
+		console.log("Patched: ",obj);
+		return _self.put(obj,{overwrite:true})	
+	}, function(err){
+		return new errors.NotFound();
+	});
 }
 	
 Model.prototype['delete']=function(id, opts /*expose*/){

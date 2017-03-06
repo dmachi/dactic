@@ -188,6 +188,10 @@ module.exports = function(dataModel){
 
 	router.get('/resource/smd', [
 		function(req,res,next){
+			console.log("GET SMD");
+			next();
+		},
+		function(req,res,next){
 			req.templateId = "smd";
 			var SMD = {
 				transport: "RAW_POST",
@@ -252,6 +256,7 @@ module.exports = function(dataModel){
 			req.apiMethod = "get";
 			req.apiParams=[req.params.id];
 			req.apiOptions = querystring.parse(req.query);
+			console.log("GET /:model/:id Template: ", req.templateId);
 			next();	
 		},
 		dataModel.middleware,
@@ -268,7 +273,42 @@ module.exports = function(dataModel){
 			debug("req.query: ", req.query);
 			req.apiParams=req.query?[req.query]:[];
 			req.apiOptions = {};
+			console.log("QUERY/:model/ Template: ", req.templateId, req.templateStyle);
 			//("Query /:model/", req.params.model, req.templateId, req.templateStyle, req.apiParams);
+			next();
+		},
+		dataModel.middleware,
+		serializationMiddleware
+	]);
+
+	router.post("/:model/:id", [
+		function(req,res,next){
+			console.log("PATCH HANDLER");
+			next();
+		},
+		bodyParser.json({limit:"10mb",type: "application/json-patch+json"}),
+		function(req,res,next){
+			req.apiModel = req.params.model;
+			req.apiMethod="patch";
+			req.apiParams = [req.params.id,req.body]
+			req.apiOptions = {};
+			next();
+		},
+		dataModel.middleware,
+		serializationMiddleware
+	]);
+
+	router.patch("/:model/:id", [
+		function(req,res,next){
+			console.log("PATCH HANDLER");
+			next();
+		},
+		bodyParser.json({limit:"10mb",type: "application/json-patch+json"}),
+		function(req,res,next){
+			req.apiModel = req.params.model;
+			req.apiMethod="patch";
+			req.apiParams = [req.params.id,req.body]
+			req.apiOptions = {};
 			next();
 		},
 		dataModel.middleware,
@@ -277,8 +317,12 @@ module.exports = function(dataModel){
 
 
 	router.post('/:model[/]',[
+		function(req,res,next){
+			console.log("Dactic Model POST");
+			next();
+		},
 		bodyParser.urlencoded(),
-		bodyParser.json({limit: 20000, type: "application/jsonrpc+json"}),
+		bodyParser.json({limit: 20000, type: ["application/jsonrpc+json","application/jsonrequest"]}),
 		bodyParser.json({limit: 20000}),
 		function(req,res,next) {
 			//("DME post /:model/", req.body);	
@@ -299,7 +343,7 @@ module.exports = function(dataModel){
 				req.apiOptions = {};
 			}
 
-			//("req.apiParams: ", req.apiParams, "is Array: ", req.apiParams instanceof Array);
+			console.log("req.apiParams: ", req.apiParams, "is Array: ", req.apiParams instanceof Array);
 			next();
 		},
 		dataModel.middleware,
@@ -307,9 +351,7 @@ module.exports = function(dataModel){
 	]);
 
 	router.put("/:model/:id", [
-		function(req,res){
-			bodyParser.json({limit: 20000})
-		},
+		bodyParser.json({limit: 20000}),
 		dataModel.middleware
 	]); 
 
