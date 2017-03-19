@@ -45,11 +45,21 @@ serializationMiddleware = [
 	function(req,res,next){
 		if (res.results) {
 			res.media = findBestMedia(req.headers.accept || "text/json",res.results,{req:req,res:res});	
-			// console.log("Serialization: ", res.media);
+			console.log("Serialization: ", res.media);
+		
 			res.set("content-type",res.media['content-type']);
 			debug("Serialize to ", res.media['content-type'], res.results.getData());
 			var serialized = res.media.serialize(res.results, {req:req,res:res});
 			when(serialized, function(out) {
+
+				if (req.headers && req.headers.download){
+					var parts = res.media['content-type'].split("/")
+					var ext = parts[parts.length-1];
+					var filename = (req.templateId || req.apiModel ||  "export") + (ext?("." + ext):"");
+					res.set({
+						'Content-Disposition': 'attachment; filename=' + filename
+					});
+				}
 				res.end(out);
 			}, function(err){
 				console.log("Error in serializer: ", err);
