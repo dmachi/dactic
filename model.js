@@ -226,7 +226,7 @@ Model.prototype.get=function(id,opts /*expose*/){
 }
 
 Model.prototype.query=function(query, opts /*expose*/){
-	console.log("BaseModel query()", query);
+	debug("BaseModel query()", query);
 	return this.store.query(query, opts);
 }
 
@@ -247,17 +247,17 @@ Model.prototype.put=function(obj, opts /*expose*/){
 				useDefaults: true
 		        });
 
-			console.log("call validate");
+			//console.log("call validate");
 		        var valid = ajv.validate(schema,obj);
-			console.log("Valid: ", valid);
+			//console.log("Valid: ", valid);
 		} catch(err){
 			console.log("Error Running Validator", err);
 			throw Error("Error Running Validator");
 		}
 
 		if (!valid){
-			console.log("ajv.errors: ", ajv.errors);
-			console.log("ajv.errorsText()", ajv.errorsText());
+			debug("ajv.errors: ", ajv.errors);
+			debug("ajv.errorsText()", ajv.errorsText());
 
 			throw Error(ajv.errorsText());
 		}
@@ -265,9 +265,9 @@ Model.prototype.put=function(obj, opts /*expose*/){
 		console.log("No Schema");
 	}
 
-	console.log("put with overwrite: ", opts.overwrite);
+	debug("put with overwrite: ", opts.overwrite);
 	return when(this.store.put(obj,opts), function(results){
-		console.log("this.store.put results: ", results);
+		debug("this.store.put results: ", results);
 		return results;
 	});
 }
@@ -275,7 +275,7 @@ Model.prototype.put=function(obj, opts /*expose*/){
 Model.prototype.post=function(obj, opts /*expose*/){
 	var _self=this;
 	opts=opts||{}
-	console.log("Model Post: ", obj);
+	debug("Model Post: ", obj);
 	if (obj && !obj.id){
 		if (opts && opts.id) {
 			obj.id = opts.id;
@@ -286,7 +286,7 @@ Model.prototype.post=function(obj, opts /*expose*/){
 		return when(_self.put(obj,opts), function(res){
 			return res;
 		},function(err){
-			console.log("Error Creating User: ", err);
+			console.log("Error Creating Object: ", err);
 		});
 
 	}else{
@@ -298,11 +298,11 @@ Model.prototype.patch=function(id,patch,opts /*expose*/){
 	var _self=this;
 	return when(_self.get(id), function(result){
 		var obj = result.getData();
-		console.log("Patching: ", obj);
+		debug("Patching: ", obj);
         	patch.forEach(function(p){
                 	jsonpatch.apply(obj,p);
         	})		
-		console.log("Patched: ",obj);
+		debug("Patched: ",obj);
 		return _self.put(obj,{overwrite:true})	
 	}, function(err){
 		return new errors.NotFound();
