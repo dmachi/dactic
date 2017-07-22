@@ -43,12 +43,28 @@ var middleware = [
 
 serializationMiddleware = [
 	function(req,res,next){
+		if (res.results && res.results.metadata){
+			console.log("Result meta: ", res.results.metadata);
+			if (res.results.metadata.totalCount){
+				var start = res.results.metadata.start || 0;
+				var count = res.results.metadata.count || res.results.getData().length;
+				var total = res.results.metadata.totalCount;
+				res.set({
+					"content-range": "items " + start + "-" + (start+count) + "/" + total
+				});			
+			}
+	
+		}
+
+		next();
+	},
+	function(req,res,next){
 		if (res.results) {
 			res.media = findBestMedia(req.headers.accept || "text/json",res.results,{req:req,res:res});	
 			console.log("Serialization: ", res.media);
 		
 			res.set("content-type",res.media['content-type']);
-			debug("Serialize to ", res.media['content-type'], res.results.getData());
+			debug("Serialize to ", res.media['content-type'], "Metadata: ", res.results.metadata);
 			var serialized = res.media.serialize(res.results, {req:req,res:res});
 			when(serialized, function(out) {
 

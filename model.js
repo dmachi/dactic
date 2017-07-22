@@ -265,9 +265,9 @@ Model.prototype.put=function(obj, opts /*expose*/){
 		console.log("No Schema");
 	}
 
-	console.log("put with overwrite: ", opts.overwrite);
+//	console.log("put with overwrite: ", opts.overwrite);
 	return when(this.store.put(obj,opts), function(results){
-		console.log("this.store.put results: ", results);
+		//console.log("this.store.put results: ", results);
 		return results;
 	});
 }
