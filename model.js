@@ -18,6 +18,9 @@ var Model = module.exports =  function(store,opts){
 
 	this.store = store;
 	this.opts = opts;
+	if (this.opts.primaryKey){
+		this.primaryKey = this.opts.primaryKey;
+	}
 
 	this.init();
 }
@@ -226,7 +229,7 @@ Model.prototype.get=function(id,opts /*expose*/){
 }
 
 Model.prototype.query=function(query, opts /*expose*/){
-	debug("BaseModel query()", query);
+	console.log("BaseModel query()", query);
 	return this.store.query(query, opts);
 }
 
@@ -247,17 +250,17 @@ Model.prototype.put=function(obj, opts /*expose*/){
 				useDefaults: true
 		        });
 
-			//console.log("call validate");
+			console.log("call validate");
 		        var valid = ajv.validate(schema,obj);
-			//console.log("Valid: ", valid);
+			console.log("Valid: ", valid);
 		} catch(err){
 			console.log("Error Running Validator", err);
 			throw Error("Error Running Validator");
 		}
 
 		if (!valid){
-			debug("ajv.errors: ", ajv.errors);
-			debug("ajv.errorsText()", ajv.errorsText());
+			console.log("ajv.errors: ", ajv.errors);
+			console.log("ajv.errorsText()", ajv.errorsText());
 
 			throw Error(ajv.errorsText());
 		}
@@ -265,9 +268,9 @@ Model.prototype.put=function(obj, opts /*expose*/){
 		console.log("No Schema");
 	}
 
-	debug("put with overwrite: ", opts.overwrite);
+//	console.log("put with overwrite: ", opts.overwrite);
 	return when(this.store.put(obj,opts), function(results){
-		debug("this.store.put results: ", results);
+		//console.log("this.store.put results: ", results);
 		return results;
 	});
 }
@@ -275,18 +278,19 @@ Model.prototype.put=function(obj, opts /*expose*/){
 Model.prototype.post=function(obj, opts /*expose*/){
 	var _self=this;
 	opts=opts||{}
-	debug("Model Post: ", obj);
+	console.log("Model Post: ", obj);
 	if (obj && !obj.id){
 		if (opts && opts.id) {
-			obj.id = opts.id;
-		}else{
-			obj.id = uuid.v4();
+			obj[_self.primaryKey] = opts.id;
+		}else if (!_self.opts.skipIDGeneration && !_self.skipIDGeneration){
+			obj[_self.primaryKey] = uuid.v4();
 		}
 		
 		return when(_self.put(obj,opts), function(res){
 			return res;
 		},function(err){
-			console.log("Error Creating Object: ", err);
+			console.log("Error Creating User: ", err);
+			return err;
 		});
 
 	}else{
@@ -298,11 +302,11 @@ Model.prototype.patch=function(id,patch,opts /*expose*/){
 	var _self=this;
 	return when(_self.get(id), function(result){
 		var obj = result.getData();
-		debug("Patching: ", obj);
+		console.log("Patching: ", obj);
         	patch.forEach(function(p){
                 	jsonpatch.apply(obj,p);
         	})		
-		debug("Patched: ",obj);
+		console.log("Patched: ",obj);
 		return _self.put(obj,{overwrite:true})	
 	}, function(err){
 		return new errors.NotFound();

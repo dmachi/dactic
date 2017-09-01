@@ -8,7 +8,12 @@ var Store = module.exports = function(id, options) {
 	console.log("StoreBase ctor: ", id, options);
 	EventEmitter.call(this);
 	this.id = id;
+	console.log("Mixin Store Options: ", options);
 	this.options=options;
+	if (this.options.primaryKey) {
+		this.primaryKey = this.options.primaryKey;
+		console.log("Store Primary Key: ", this.primaryKey);
+	}	
 	this.init();
 }
 
