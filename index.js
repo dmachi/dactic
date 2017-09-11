@@ -5,8 +5,10 @@ var URL = require("url");
 var querystring = require("querystring");
 var bodyParser = require("body-parser");
 var findBestMedia = require("./media").findBestMedia;
+var findDeserializer = require("./media").findDeserializer;
 var when = require("promised-io/promise").when;
 var All = require("promised-io/promise").all;
+var ReadStream = require("stream").Readable;
 
 var middleware = [
 	// Parse the query string, extract http_* parameters to set as headers
@@ -66,8 +68,9 @@ serializationMiddleware = [
 			res.set("content-type",res.media['content-type']);
 			debug("Serialize to ", res.media['content-type'], "Metadata: ", res.results.metadata);
 			var serialized = res.media.serialize(res.results, {req:req,res:res});
+			
 			when(serialized, function(out) {
-
+				console.log("Serialized: ", out);
 				if (req.headers && req.headers.download){
 					var parts = res.media['content-type'].split("/")
 					var ext = parts[parts.length-1];
@@ -76,7 +79,13 @@ serializationMiddleware = [
 						'Content-Disposition': 'attachment; filename=' + filename
 					});
 				}
-				res.end(out);
+
+				if ((out instanceof ReadStream) || out.stream){
+					console.log("Serialized ReadStream");
+					out.pipe(res);
+				}else{
+					res.end(out);
+				}
 			}, function(err){
 				console.log("Error in serializer: ", err);
 				next(err);
@@ -341,6 +350,28 @@ module.exports = function(dataModel){
 		serializationMiddleware
 	]);
 
+
+	router.post("/:model[/]", [
+		function(req,res,next){
+			if (req.headers && req.headers["content-type"]) {
+				console.log("Dactic Model Deserializer POST content-type: ", req.headers["content-type"]);
+				var deserializer = findDeserializer(req.headers["content-type"]);
+				if (!deserializer) {
+					return next("route");
+				}
+				req.apiModel = req.params.model;
+				req.apiMethod = "post"
+				req.apiParams = deserializer(req);
+
+				console.log("Deserializer: ", deserializer);
+				next();
+			}else{
+				next("route");		
+			}
+		},
+		dataModel.middleware,
+		serializationMiddleware
+	]);
 
 	router.post('/:model[/]',[
 		function(req,res,next){
