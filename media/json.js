@@ -14,8 +14,8 @@ addMedia({
 			results=""
 		}
 
-		return new JsonStreamer(results.results||results);
-		//return JSON.stringify(results.results || results);
+		//return new JsonStreamer(results.results||results);
+		return JSON.stringify(results.results || results);
 	}
 })
 
@@ -34,7 +34,7 @@ addMedia({
 			results=""
 		}
 
-		return new JsonStreamer(results.results||results);
+		return JSON.stringify(results.results || results, null, 4);
 
 	}
 })
