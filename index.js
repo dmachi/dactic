@@ -46,7 +46,7 @@ var middleware = [
 serializationMiddleware = [
 	function(req,res,next){
 		if (res.results && res.results.metadata){
-			console.log("Result meta: ", res.results.metadata);
+			//console.log("Result meta: ", res.results.metadata);
 			if (res.results.metadata.totalCount){
 				var start = res.results.metadata.start || 0;
 				var count = res.results.metadata.count || res.results.getData().length;
@@ -63,14 +63,14 @@ serializationMiddleware = [
 	function(req,res,next){
 		if (res.results) {
 			res.media = findBestMedia(req.headers.accept || "text/json",res.results,{req:req,res:res});	
-			console.log("Serialization: ", res.media);
+			//console.log("Serialization: ", res.media);
 		
 			res.set("content-type",res.media['content-type']);
 			debug("Serialize to ", res.media['content-type'], "Metadata: ", res.results.metadata);
 			var serialized = res.media.serialize(res.results, {req:req,res:res});
 			
 			when(serialized, function(out) {
-				console.log("Serialized: ", out);
+				//console.log("Serialized: ", out);
 				if (req.headers && req.headers.download){
 					var parts = res.media['content-type'].split("/")
 					var ext = parts[parts.length-1];
@@ -81,7 +81,7 @@ serializationMiddleware = [
 				}
 
 				if ((out instanceof ReadStream) || out.stream){
-					console.log("Serialized ReadStream");
+					//console.log("Serialized ReadStream");
 					out.pipe(res);
 				}else{
 					res.end(out);
@@ -318,7 +318,7 @@ module.exports = function(dataModel){
 
 	router.post("/:model/:id", [
 		function(req,res,next){
-			console.log("PATCH HANDLER");
+			//console.log("PATCH HANDLER");
 			next();
 		},
 		bodyParser.json({limit:"10mb",type: "application/json-patch+json"}),
@@ -335,7 +335,7 @@ module.exports = function(dataModel){
 
 	router.patch("/:model/:id", [
 		function(req,res,next){
-			console.log("PATCH HANDLER");
+			//console.log("PATCH HANDLER");
 			next();
 		},
 		bodyParser.json({limit:"10mb",type: "application/json-patch+json"}),
@@ -363,7 +363,7 @@ module.exports = function(dataModel){
 				req.apiMethod = "post"
 				req.apiParams = deserializer(req);
 
-				console.log("Deserializer: ", deserializer);
+				//console.log("Deserializer: ", deserializer);
 				next();
 			}else{
 				next("route");		
@@ -375,7 +375,7 @@ module.exports = function(dataModel){
 
 	router.post('/:model[/]',[
 		function(req,res,next){
-			console.log("Dactic Model POST");
+			//console.log("Dactic Model POST");
 			next();
 		},
 		bodyParser.urlencoded(),
@@ -400,7 +400,7 @@ module.exports = function(dataModel){
 				req.apiOptions = {};
 			}
 
-			console.log("req.apiParams: ", req.apiParams, "is Array: ", req.apiParams instanceof Array);
+			//console.log("req.apiParams: ", req.apiParams, "is Array: ", req.apiParams instanceof Array);
 			next();
 		},
 		dataModel.middleware,
