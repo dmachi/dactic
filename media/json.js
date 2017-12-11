@@ -14,6 +14,8 @@ addMedia({
 			results=""
 		}
 
+		//console.log("Start Json Stream: ", results);
+
 		//return new JsonStreamer(results.results||results);
 		return JSON.stringify(results.results || results);
 	}

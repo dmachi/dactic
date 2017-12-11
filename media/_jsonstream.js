@@ -7,16 +7,16 @@ var fs = require('fs');
 var stripeof = require("strip-eof");
 
 function walk(data,defs){
-	//console.log("Walk data: ", data);
+	console.log("Walk data: ", data);
 	var out = [];
 	if (!defs){ defs=[]; }
 
 	if (data instanceof Array){
-		//console.log("Data is array");
+		console.log("Data is array");
 		out.push("[");
 
 		data.forEach(function(d,index){
-			//console.log("Walk Array Element", d);
+			console.log("Walk Array Element", d);
 			out.push(walk(d));
 			if (index < (data.length-1)){
 				out.push(", ");
@@ -33,7 +33,7 @@ function walk(data,defs){
 		out.push("{");
 		var keys = Object.keys(data)
 		keys.forEach(function(key,index){
-			//console.log(" Walk object key: ", key);
+			console.log(" Walk object key: ", key);
 			out.push('"' + key + '": ');
 			out.push(walk(data[key]))
 			if (index<(keys.length-1)) {
@@ -42,19 +42,19 @@ function walk(data,defs){
 		});
 		out.push("}");
 	}else{
-		//console.log("parse other data");
+		console.log("parse other data");
 		out.push(JSON.stringify(data));
 	}
 
-	//console.log("out: ", out);
+	console.log("out: ", out);
 	return when(All(out),function(results){
-		//console.log("results: ", results);
+		console.log("results: ", results);
 		return results;
 	});
 }
 
 function popElement(data){
-	//console.log("popElement: ", data);
+	console.log("popElement: ", data);
 	var elem;
 	if (data[0] instanceof Array){
 		//console.log("data[0] is array");
@@ -79,10 +79,10 @@ function popElement(data){
 function JsonStringifier(data,options){
 	ReadStream.call(this,options);
 	var _self=this;
-	this.data = when(walk(data), function(results){
-		_self.data = results;
-		return results;
-	});;
+	//this.data// = walk(data), function(results){
+	//	_self.data = results;
+	//	return results;
+	//});;
 };
 
 
@@ -92,34 +92,34 @@ util.inherits(JsonStringifier,ReadStream);
 
 
 JsonStringifier.prototype._read= function(size){
-	//console.log("_read()");
+	console.log("_read()");
 	var data = this.data;
 	var _self=this;
 
 	if (_self.curStream){
-		//console.log("Found CurStream, resume");
+		console.log("Found CurStream, resume");
 		_self.curStream.resume();
 		return;
 	}
 
 	if (data) {
-		//console.log("Read Data: ", data);
+		console.log("Read Data: ", data);
 		when(data, function(data){
-			//console.log("promised data: ", data);
+			console.log("promised data: ", data);
 			var elem = popElement(data);
 			if (elem && ((elem instanceof ReadStream)||(elem.stream))){ //(elem && elem.read && (typeof elem.read=="function")){
-				//console.log("Found ReadStream, check to see if its the current stream");
+				console.log("Found ReadStream, check to see if its the current stream");
 				_self.curStream = elem;
-				//console.log("New Stream, attach");
+				console.log("New Stream, attach");
 				_self.curStream.on("data", function(chunk){
-					//console.log("New stream data: ->" +  chunk.toString() + "<-");
-					//console.log("Pause curStream");
+					console.log("New stream data: ->" +  chunk.toString() + "<-");
+					console.log("Pause curStream");
 					_self.curStream.pause();
 					_self.push(stripeof(chunk));
 				});
 
 				_self.curStream.on('end', function(){
-					//console.log("end Curstream");
+					console.log("end Curstream");
 					delete _self.curStream;
 					_self._read(size);
 				});
