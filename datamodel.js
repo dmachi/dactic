@@ -25,6 +25,8 @@ function DataModel(options) {
 		if (req.apiMethod=="query"){
 
 			var model = self.model[req.apiModel];
+			if (!model) { return next("route"); }
+
 			debug('self.model: ', self.model);
 			maxCount = model.maxLimit;
 

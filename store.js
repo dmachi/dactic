@@ -5,14 +5,14 @@ var util=require("util");
 var errors = require("./errors");
 
 var Store = module.exports = function(id, options) {
-	console.log("StoreBase ctor: ", id, options);
+	//console.log("StoreBase ctor: ", id, options);
 	EventEmitter.call(this);
 	this.id = id;
-	console.log("Mixin Store Options: ", options);
+	//console.log("Mixin Store Options: ", options);
 	this.options=options;
 	if (this.options.primaryKey) {
 		this.primaryKey = this.options.primaryKey;
-		console.log("Store Primary Key: ", this.primaryKey);
+		//console.log("Store Primary Key: ", this.primaryKey);
 	}	
 	this.init();
 }
@@ -27,7 +27,7 @@ Store.prototype.init=function(){
 	}
 
 	this.connect().then(function(){
-		console.log("CONNECTED TO DATA SOURCE: ", _self.id);
+		//console.log("CONNECTED TO DATA SOURCE: ", _self.id);
 
 		if (_self.schema){
 			_self.setSchema(_self.schema);		

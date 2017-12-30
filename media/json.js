@@ -14,8 +14,6 @@ addMedia({
 			results=""
 		}
 
-		//console.log("Serialize results: ", results.results || results);
-		//return new JsonStreamer(results.results||results);
 		try {
 			return JSON.stringify(results.results || results);
 		}catch(err){
