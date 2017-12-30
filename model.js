@@ -237,7 +237,6 @@ Model.prototype.put=function(obj, opts /*expose*/){
 //	console.log("base model put()", obj);
 
 	var schema = this.getSchema();
-
 	if (schema){
 //		console.log("Schema: ", schema);
 //		console.log("obj: ", obj);
@@ -278,7 +277,6 @@ Model.prototype.put=function(obj, opts /*expose*/){
 Model.prototype.post=function(obj, opts /*expose*/){
 	var _self=this;
 	opts=opts||{}
-	//console.log("Model Post: ", obj);
 	if (obj && !obj.id){
 		if (opts && opts.id) {
 			obj[_self.primaryKey] = opts.id;

@@ -14,8 +14,13 @@ addMedia({
 			results=""
 		}
 
+		//console.log("Serialize results: ", results.results || results);
 		//return new JsonStreamer(results.results||results);
-		return JSON.stringify(results.results || results);
+		try {
+			return JSON.stringify(results.results || results);
+		}catch(err){
+			console.log("Unable to create JSON: ", err);
+		}
 	}
 })
 
