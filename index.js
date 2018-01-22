@@ -20,10 +20,12 @@ var middleware = [
 			var parsed = querystring.parse(url.query);
 			Object.keys(parsed).forEach(function(key){
 				if (key.match("http_")) {
+					//console.log("key: ", key);
 					var header = key.split("_")[1];
 					req.headers[header] = parsed[key];
 					var regex = new RegExp("[&]" + key + "=" + parsed[key]);
 					url.query = url.query.replace(regex,"");
+					//console.log("Updated Query: ", url.query);
 				}
 			});
 			req.query = url.query; 
@@ -47,10 +49,11 @@ serializationMiddleware = [
 	function(req,res,next){
 		if (res.results && res.results.metadata){
 			//console.log("Result meta: ", res.results.metadata);
-			if (res.results.metadata.totalCount){
+			if (typeof res.results.metadata.totalCount != "undefined"){
 				var start = res.results.metadata.start || 0;
 				var count = res.results.metadata.count || res.results.getData().length;
-				var total = res.results.metadata.totalCount;
+				var total = res.results.metadata.totalCount || 0;
+				//console.log("set content range total: ", total);
 				res.set({
 					"content-range": "items " + start + "-" + (start+count) + "/" + total
 				});			
@@ -66,6 +69,7 @@ serializationMiddleware = [
 			//console.log("Serialization: ", res.media);
 		
 			res.set("content-type",res.media['content-type']);
+			//console.log("serialize to: ", res.media['content-type']);
 			debug("Serialize to ", res.media['content-type'], "Metadata: ", res.results.metadata);
 			var serialized = res.media.serialize(res.results, {req:req,res:res});
 			
@@ -223,7 +227,7 @@ module.exports = function(dataModel){
 
 	router.get('/resource/smd', [
 		function(req,res,next){
-			console.log("GET SMD");
+			//console.log("GET SMD");
 			next();
 		},
 		function(req,res,next){
@@ -354,7 +358,7 @@ module.exports = function(dataModel){
 	router.post("/:model[/]", [
 		function(req,res,next){
 			if (req.headers && req.headers["content-type"]) {
-				console.log("Dactic Model Deserializer POST content-type: ", req.headers["content-type"]);
+				//console.log("Dactic Model Deserializer POST content-type: ", req.headers["content-type"]);
 				var deserializer = findDeserializer(req.headers["content-type"]);
 				if (!deserializer) {
 					return next("route");
