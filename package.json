@@ -1,6 +1,6 @@
 {
   "name": "dactic",
-  "version": "0.8.5",
+  "version": "0.8.6",
   "description": "Data modelling and API framework",
   "main": "index.js",
   "scripts": {
