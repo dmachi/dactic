@@ -84,7 +84,7 @@ serializationMiddleware = [
 					});
 				}
 
-				if ((out instanceof ReadStream) || out.stream){
+				if ((out instanceof ReadStream) || (out && out.stream)){
 					//console.log("Serialized ReadStream");
 					out.pipe(res);
 				}else{
