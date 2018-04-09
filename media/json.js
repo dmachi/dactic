@@ -6,8 +6,10 @@ var JsonStreamer = require("./_jsonstream");
 addMedia({
 	"content-type": "application/json",
 	serialize: function(results,options){
+	
 		if (results instanceof Result){
 			results = results.getData();	
+			return JSON.stringify(results);
 		}
 
 		if (!results){
@@ -31,6 +33,7 @@ addMedia({
 		if (results instanceof Result){
 			results = results.getData();	
 			metadata = results.getMetadata();
+			return JSON.stringify(results,null,4);
 		}
 
 		if (!results){
