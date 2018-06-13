@@ -22,7 +22,6 @@ var Result = module.exports =  function(data,metadata){
 util.inherits(Result, EventEmitter);
 
 Result.prototype.getData = function(){
-	console.log("Result getData() ", this.data);
 	return this.data;
 }
 

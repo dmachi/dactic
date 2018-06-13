@@ -25,6 +25,8 @@ function DataModel(options) {
 		if (req.apiMethod=="query"){
 
 			var model = self.model[req.apiModel];
+			if (!model) { return next("route"); }
+
 			debug('self.model: ', self.model);
 			maxCount = model.maxLimit;
 
@@ -88,11 +90,11 @@ function DataModel(options) {
 		var acl = req.apiPrivilegeFacet || "public";
 		var opts = {req: req, res: res}
 		debug("Get Executor: ", acl, req.apiModel, req.apiMethod, req.apiParams);
-		console.log("Priv Facet: ", acl, "self.privilegeFacet[req.apiModel] exists ", !!self.privilegeFacet[req.apiModel][acl], "method type: ", typeof self.privilegeFacet[req.apiModel][acl][req.apiMethod] );
+		//console.log("Priv Facet: ", acl, "self.privilegeFacet[req.apiModel] exists ", !!self.privilegeFacet[req.apiModel][acl], "method type: ", typeof self.privilegeFacet[req.apiModel][acl][req.apiMethod] );
 		//((typeof self.privilegeFacet[req.apiModel][acl][req.apiMethod]== "boolean" )?("Boolean Facet Method: " + self.privilegeFacet[req.apiModel][acl][req.apiMethod]):"");
 		
-		console.log("Model Method: ", self.model[req.apiModel][req.apiMethod]);
-		console.log(" self.privilegeFacet[req.apiModel][acl]: ", self.privilegeFacet[req.apiModel]);
+		//console.log("Model Method: ", self.model[req.apiModel][req.apiMethod]);
+		//console.log(" self.privilegeFacet[req.apiModel][acl]: ", self.privilegeFacet[req.apiModel]);
 		if (acl!="model" && self.privilegeFacet[req.apiModel] && self.privilegeFacet[req.apiModel][acl] && self.privilegeFacet[req.apiModel][acl][req.apiMethod]){
 			req.executor = function(params) {
 				params.push(opts);
@@ -139,7 +141,7 @@ function DataModel(options) {
 //			}else{
 			//("Results: ", results);
 				when(results, function(results){
-					console.log("dataModel results handler results: ", results);
+					//console.log("dataModel results handler results: ", results);
 					res.results = results;
 					if (req.apiMethod=="query" && results && results.metadata) {
 						debug("Results.metadata: ", results.metadata);

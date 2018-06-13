@@ -6,6 +6,23 @@ module.exports.addMedia = function(media){
 	MediaHandlers.push(media)
 }
 
+module.exports.findDeserializer=function(type){
+	var deserializer;
+
+	if (MediaHandlers.some(function(h){
+		console.log("Check Media: ", type, h);
+		if ((h["content-type"]==type) && h.deserialize){
+			deserializer=h.deserialize;
+			console.log("Found deserializer match: ", h);
+			return true;
+		}
+	})) {
+		return deserializer;
+	}else{
+		return false;
+	}
+		
+}
 module.exports.findBestMedia = function(type,results,options){
 	var parts= type.split(";");
 	var accepts = {};

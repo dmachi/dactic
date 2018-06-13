@@ -229,7 +229,7 @@ Model.prototype.get=function(id,opts /*expose*/){
 }
 
 Model.prototype.query=function(query, opts /*expose*/){
-	console.log("BaseModel query()", query);
+	//console.log("BaseModel query()", query);
 	return this.store.query(query, opts);
 }
 
@@ -237,7 +237,6 @@ Model.prototype.put=function(obj, opts /*expose*/){
 //	console.log("base model put()", obj);
 
 	var schema = this.getSchema();
-
 	if (schema){
 //		console.log("Schema: ", schema);
 //		console.log("obj: ", obj);
@@ -250,17 +249,17 @@ Model.prototype.put=function(obj, opts /*expose*/){
 				useDefaults: true
 		        });
 
-			console.log("call validate");
+			//console.log("call validate");
 		        var valid = ajv.validate(schema,obj);
-			console.log("Valid: ", valid);
+			//console.log("Valid: ", valid);
 		} catch(err){
 			console.log("Error Running Validator", err);
 			throw Error("Error Running Validator");
 		}
 
 		if (!valid){
-			console.log("ajv.errors: ", ajv.errors);
-			console.log("ajv.errorsText()", ajv.errorsText());
+			//console.log("ajv.errors: ", ajv.errors);
+			//console.log("ajv.errorsText()", ajv.errorsText());
 
 			throw Error(ajv.errorsText());
 		}
@@ -278,7 +277,6 @@ Model.prototype.put=function(obj, opts /*expose*/){
 Model.prototype.post=function(obj, opts /*expose*/){
 	var _self=this;
 	opts=opts||{}
-	console.log("Model Post: ", obj);
 	if (obj && !obj.id){
 		if (opts && opts.id) {
 			obj[_self.primaryKey] = opts.id;
@@ -302,11 +300,11 @@ Model.prototype.patch=function(id,patch,opts /*expose*/){
 	var _self=this;
 	return when(_self.get(id), function(result){
 		var obj = result.getData();
-		console.log("Patching: ", obj);
+		//console.log("Patching: ", obj);
         	patch.forEach(function(p){
                 	jsonpatch.apply(obj,p);
         	})		
-		console.log("Patched: ",obj);
+		//console.log("Patched: ",obj);
 		return _self.put(obj,{overwrite:true})	
 	}, function(err){
 		return new errors.NotFound();
