@@ -32,7 +32,6 @@ addMedia({
 		var metadata;
 		if (results instanceof Result){
 			results = results.getData();	
-			metadata = results.getMetadata();
 			return JSON.stringify(results,null,4);
 		}
 
