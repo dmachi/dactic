@@ -282,7 +282,7 @@ Model.prototype.post=function(obj, opts /*expose*/){
 	if (obj && !obj.id){
 		if (opts && opts.id) {
 			obj[_self.primaryKey] = opts.id;
-		}else if (!_self.opts.skipIDGeneration && !_self.skipIDGeneration){
+		}else if ((_self.opts && !_self.opts.skipIDGeneration) && !_self.skipIDGeneration){
 			obj[_self.primaryKey] = uuid.v4();
 		}
 		

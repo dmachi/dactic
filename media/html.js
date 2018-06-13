@@ -39,10 +39,11 @@ addMedia({
 		when(resolvedTemplate, function(resolvedTemplate){
 			opts.res.render(resolvedTemplate,{results: obj,request:opts.req},function(err,html){
 				if (err) {
-					debug("Error Rendering HTML Template: ", err);
+					debug("Error Rendering HTML Template: "+ err);
 					debug("Rendering Template as: ", opts.req.templateId + (opts.req.templateStyle?("-"+opts.req.templateStyle):""));
 					opts.res.render(opts.req.templateId + (opts.req.templateStyle?("-"+opts.req.templateStyle):""), {results: obj, request: opts.req}, function(err,html){
 						if (err) { 
+							console.log("Error Rendering Template " + opts.req.templateId + (opts.req.templateStyle?("-"+opts.req.templateStyle):""+ err));
 							opts.res.render('default' + (opts.req.templateStyle?("-"+opts.req.templateStyle):""), {results: obj, request: opts.req}, function(err,html){
 								if (err) { 
 									return def.reject(err); 
@@ -58,8 +59,8 @@ addMedia({
 				def.resolve(html);	
 			});	
 		}, function(err){
-			console.log("Unable to Resolve template");
-			def.reject("Unable To Resolve Template");
+			console.log("Unable to Resolve template: " + err);
+			def.reject(err);
 		});	
 
 		return def.promise;
