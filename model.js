@@ -7,6 +7,7 @@ var util=require("util");
 var introspect = require("introspect");
 var uuid = require("uuid");
 var AJV = require("ajv");
+var jsonpatch = require("json-patch");
 
 var Model = module.exports =  function(store,opts){
 	EventEmitter.call(this);
@@ -17,6 +18,9 @@ var Model = module.exports =  function(store,opts){
 
 	this.store = store;
 	this.opts = opts;
+	if (this.opts.primaryKey){
+		this.primaryKey = this.opts.primaryKey;
+	}
 
 	this.init();
 }
@@ -235,7 +239,7 @@ Model.prototype.put=function(obj, opts /*expose*/){
 	if (schema){
 		//console.log("Schema: ", schema);
 		//console.log("obj: ", obj);
-		try {
+	try {
 
 			var ajv = new AJV({
 		                v5: true,
@@ -270,25 +274,39 @@ Model.prototype.put=function(obj, opts /*expose*/){
 Model.prototype.post=function(obj, opts /*expose*/){
 	var _self=this;
 	opts=opts||{}
-	//console.log("Model Post: ", obj);
+
 	if (obj && !obj.id){
 		if (opts && opts.id) {
-			obj.id = opts.id;
-			//console.log("Generating New PatientUser with ID: ", obj.id);
-		}else{
-			obj.id = uuid.v4();
+			obj[_self.primaryKey] = opts.id;
+		}else if ((_self.opts && !_self.opts.skipIDGeneration) && !_self.skipIDGeneration){
+			obj[_self.primaryKey] = uuid.v4();
 		}
 		
 		return when(_self.put(obj,opts), function(res){
-			//console.log("model post() self.put() results: ", res);
 			return res;
 		},function(err){
 			console.log("Error Creating User: ", err);
+			return err;
 		});
 
 	}else{
 		return new errors.BadRequest();
 	}
+}
+
+Model.prototype.patch=function(id,patch,opts /*expose*/){
+	var _self=this;
+	return when(_self.get(id), function(result){
+		var obj = result.getData();
+		//console.log("Patching: ", obj);
+        	patch.forEach(function(p){
+                	jsonpatch.apply(obj,p);
+        	})		
+		//console.log("Patched: ",obj);
+		return _self.put(obj,{overwrite:true})	
+	}, function(err){
+		return new errors.NotFound();
+	});
 }
 	
 Model.prototype['delete']=function(id, opts /*expose*/){

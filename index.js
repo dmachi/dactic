@@ -5,8 +5,10 @@ var URL = require("url");
 var querystring = require("querystring");
 var bodyParser = require("body-parser");
 var findBestMedia = require("./media").findBestMedia;
+var findDeserializer = require("./media").findDeserializer;
 var when = require("promised-io/promise").when;
 var All = require("promised-io/promise").all;
+var ReadStream = require("stream").Readable;
 
 var middleware = [
 	// Parse the query string, extract http_* parameters to set as headers
@@ -18,10 +20,12 @@ var middleware = [
 			var parsed = querystring.parse(url.query);
 			Object.keys(parsed).forEach(function(key){
 				if (key.match("http_")) {
+					//console.log("key: ", key);
 					var header = key.split("_")[1];
 					req.headers[header] = parsed[key];
 					var regex = new RegExp("[&]" + key + "=" + parsed[key]);
 					url.query = url.query.replace(regex,"");
+					//console.log("Updated Query: ", url.query);
 				}
 			});
 			req.query = url.query; 
@@ -43,13 +47,48 @@ var middleware = [
 
 serializationMiddleware = [
 	function(req,res,next){
+		if (res.results && res.results.metadata){
+			//console.log("Result meta: ", res.results.metadata);
+			if (typeof res.results.metadata.totalCount != "undefined"){
+				var start = res.results.metadata.start || 0;
+				var count = res.results.metadata.count || res.results.getData().length;
+				var total = res.results.metadata.totalCount || 0;
+				//console.log("set content range total: ", total);
+				res.set({
+					"content-range": "items " + start + "-" + (start+count) + "/" + total
+				});			
+			}
+	
+		}
+
+		next();
+	},
+	function(req,res,next){
 		if (res.results) {
 			res.media = findBestMedia(req.headers.accept || "text/json",res.results,{req:req,res:res});	
+		
 			res.set("content-type",res.media['content-type']);
-			debug("Serialize to ", res.media['content-type'], res.results.getData());
+			//console.log("serialize to: ", res.media['content-type']);
+			debug("Serialize to ", res.media['content-type'], "Metadata: ", res.results.metadata);
 			var serialized = res.media.serialize(res.results, {req:req,res:res});
+			
 			when(serialized, function(out) {
-				res.end(out);
+				//console.log("Serialized: ", out);
+				if (req.headers && req.headers.download){
+					var parts = res.media['content-type'].split("/")
+					var ext = parts[parts.length-1];
+					var filename = (req.templateId || req.apiModel ||  "export") + (ext?("." + ext):"");
+					res.set({
+						'Content-Disposition': 'attachment; filename=' + filename
+					});
+				}
+
+				if ((out instanceof ReadStream) || (out && out.stream)){
+					//console.log("Serialized ReadStream");
+					out.pipe(res);
+				}else{
+					res.end(out);
+				}
 			}, function(err){
 				console.log("Error in serializer: ", err);
 				next(err);
@@ -187,6 +226,10 @@ module.exports = function(dataModel){
 
 	router.get('/resource/smd', [
 		function(req,res,next){
+			//console.log("GET SMD");
+			next();
+		},
+		function(req,res,next){
 			req.templateId = "smd";
 			var SMD = {
 				transport: "RAW_POST",
@@ -251,6 +294,7 @@ module.exports = function(dataModel){
 			req.apiMethod = "get";
 			req.apiParams=[req.params.id];
 			req.apiOptions = querystring.parse(req.query);
+			console.log("GET /:model/:id Template: ", req.templateId);
 			next();	
 		},
 		dataModel.middleware,
@@ -267,6 +311,7 @@ module.exports = function(dataModel){
 			debug("req.query: ", req.query);
 			req.apiParams=req.query?[req.query]:[];
 			req.apiOptions = {};
+			console.log("QUERY/:model/ Template: ", req.templateId, req.templateStyle);
 			//("Query /:model/", req.params.model, req.templateId, req.templateStyle, req.apiParams);
 			next();
 		},
@@ -274,6 +319,62 @@ module.exports = function(dataModel){
 		serializationMiddleware
 	]);
 
+	router.post("/:model/:id", [
+		function(req,res,next){
+			//console.log("PATCH HANDLER");
+			next();
+		},
+		bodyParser.json({limit:"10mb",type: "application/json-patch+json"}),
+		function(req,res,next){
+			req.apiModel = req.params.model;
+			req.apiMethod="patch";
+			req.apiParams = [req.params.id,req.body]
+			req.apiOptions = {};
+			next();
+		},
+		dataModel.middleware,
+		serializationMiddleware
+	]);
+
+	router.patch("/:model/:id", [
+		function(req,res,next){
+			//console.log("PATCH HANDLER");
+			next();
+		},
+		bodyParser.json({limit:"10mb",type: "application/json-patch+json"}),
+		function(req,res,next){
+			req.apiModel = req.params.model;
+			req.apiMethod="patch";
+			req.apiParams = [req.params.id,req.body]
+			req.apiOptions = {};
+			next();
+		},
+		dataModel.middleware,
+		serializationMiddleware
+	]);
+
+
+	router.post("/:model[/]", [
+		function(req,res,next){
+			if (req.headers && req.headers["content-type"]) {
+				//console.log("Dactic Model Deserializer POST content-type: ", req.headers["content-type"]);
+				var deserializer = findDeserializer(req.headers["content-type"]);
+				if (!deserializer) {
+					return next("route");
+				}
+				req.apiModel = req.params.model;
+				req.apiMethod = "post"
+				req.apiParams = deserializer(req);
+
+				//console.log("Deserializer: ", deserializer);
+				next();
+			}else{
+				next("route");		
+			}
+		},
+		dataModel.middleware,
+		serializationMiddleware
+	]);
 
 	router.post('/:model[/]',[
 		function(req,res,next){
@@ -309,9 +410,7 @@ module.exports = function(dataModel){
 	]);
 
 	router.put("/:model/:id", [
-		function(req,res){
-			bodyParser.json({limit: 20000})
-		},
+		bodyParser.json({limit: 20000}),
 		dataModel.middleware
 	]); 
 

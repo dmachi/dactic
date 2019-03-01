@@ -8,8 +8,13 @@ var errors = require("./errors");
 var Store = module.exports = function(id, options) {
 	EventEmitter.call(this);
 	this.id = id;
+	//console.log("Mixin Store Options: ", options);
 	this.options=options;
 	this.initialized = new defer();
+	if (this.options.primaryKey) {
+		this.primaryKey = this.options.primaryKey;
+		//console.log("Store Primary Key: ", this.primaryKey);
+	}	
 	this.init();
 }
 
