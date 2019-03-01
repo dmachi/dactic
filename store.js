@@ -1,14 +1,15 @@
 var parser = require("rql/parser");
 var EventEmitter = require('events').EventEmitter;
 var defer = require("promised-io/promise").defer;
+var when = require("promised-io/promise").when;
 var util=require("util");
 var errors = require("./errors");
 
 var Store = module.exports = function(id, options) {
-	console.log("StoreBase ctor: ", id, options);
 	EventEmitter.call(this);
 	this.id = id;
 	this.options=options;
+	this.initialized = new defer();
 	this.init();
 }
 
@@ -22,18 +23,22 @@ Store.prototype.init=function(){
 	}
 
 	this.connect().then(function(){
-		console.log("CONNECTED TO DATA SOURCE: ", _self.id);
+		//console.log("CONNECTED TO DATA SOURCE: ", _self.id);
 
 		if (_self.schema){
 			_self.setSchema(_self.schema);		
 		}
+
+		_self.initialized.resolve(true);
+
 	}, function(err){
 		console.error("Unable to Connect to Data Source: " + err);
+		_self.initialized.reject(err);
 	})
 }
 
 Store.prototype.setSchema=function(schema){
-	console.log("setSchema")
+	//console.log("setSchema")
 	this.schema=schema;
 	var def = new defer();
 	def.resolve(true);

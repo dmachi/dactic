@@ -88,11 +88,11 @@ function DataModel(options) {
 		var acl = req.apiPrivilegeFacet || "public";
 		var opts = {req: req, res: res}
 		debug("Get Executor: ", acl, req.apiModel, req.apiMethod, req.apiParams);
-		console.log("Priv Facet: ", acl, "self.privilegeFacet[req.apiModel] exists ", !!self.privilegeFacet[req.apiModel][acl], "method type: ", typeof self.privilegeFacet[req.apiModel][acl][req.apiMethod] );
+		//console.log("Priv Facet: ", acl, "self.privilegeFacet[req.apiModel] exists ", !!self.privilegeFacet[req.apiModel][acl], "method type: ", typeof self.privilegeFacet[req.apiModel][acl][req.apiMethod] );
 		//((typeof self.privilegeFacet[req.apiModel][acl][req.apiMethod]== "boolean" )?("Boolean Facet Method: " + self.privilegeFacet[req.apiModel][acl][req.apiMethod]):"");
 		
-		console.log("Model Method: ", self.model[req.apiModel][req.apiMethod]);
-		console.log(" self.privilegeFacet[req.apiModel][acl]: ", self.privilegeFacet[req.apiModel]);
+		//console.log("Model Method: ", self.model[req.apiModel][req.apiMethod]);
+		//console.log(" self.privilegeFacet[req.apiModel][acl]: ", self.privilegeFacet[req.apiModel]);
 		if (acl!="model" && self.privilegeFacet[req.apiModel] && self.privilegeFacet[req.apiModel][acl] && self.privilegeFacet[req.apiModel][acl][req.apiMethod]){
 			req.executor = function(params) {
 				params.push(opts);
@@ -132,14 +132,14 @@ function DataModel(options) {
 				debug("Invalid Executor");
 				return next(new Error("Not Found"));
 			}
-			debug("Call Executor");
+			debug("Call Executor", req.apiParams);
 			var results = req.executor(req.apiParams);
 //			if (!results){
 //				next("route");
 //			}else{
 			//("Results: ", results);
 				when(results, function(results){
-					//("results: ", results);
+					//console.log("dataModel results handler results: ", results);
 					res.results = results;
 					if (req.apiMethod=="query" && results && results.metadata) {
 						debug("Results.metadata: ", results.metadata);

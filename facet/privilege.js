@@ -13,7 +13,6 @@ var Facet = module.exports =  function(wrapper){
 		this[prop]=wrapper[prop];
 	}
 
-	console.log("Facet Model: ", this.model);
 	if (this.model) { this.init(); }
 }
 
@@ -30,11 +29,11 @@ Facet.prototype.init=function(){
 	var services = this._smd.services;
 	if (this.permissive) {
 		Object.keys(services).forEach(function(method){
-			console.log("Permissive Methods: ", method);
+			//console.log("Permissive Methods: ", method);
 			if (typeof this[method] == 'undefined'){
 				this[method] = function(){
-					console.log("Facet Wrapper Arguments for " + method + ":", arguments);
-					console.log("  wrapper args is array: ", arguments instanceof Array);
+					//console.log("Facet Wrapper Arguments for " + method + ":", arguments);
+					//console.log("  wrapper args is array: ", arguments instanceof Array);
 					return this.model[method].apply(this.model,arguments);
 				}
 			}
@@ -43,7 +42,7 @@ Facet.prototype.init=function(){
 		Object.keys(services).forEach(function(method){
 			if (this[method] === true){
 				this[method] = function(){
-					console.log("Priv Facet call model method with args: ", arguments);
+					//console.log("Priv Facet call model method with args: ", arguments);
 					return this.model[method].apply(this.model, arguments);	
 				}
 			}else if (typeof this[method]=='function'){
@@ -173,7 +172,7 @@ Facet.prototype.getServiceDescription=function(){
 }
 
 Facet.prototype.get=function(id,opts /*expose*/){
-	console.log("PrivilegeFacet get()", id);
+	//console.log("PrivilegeFacet get()", id);
 	if (this.permissive) {
 		return this.model.get(id,opts);
 	}
@@ -181,7 +180,7 @@ Facet.prototype.get=function(id,opts /*expose*/){
 }
 
 Facet.prototype.query=function(query, opts /*expose*/){
-	console.log("Privilege Facet query: ", query);
+	//console.log("Privilege Facet query: ", query);
 	if (this.permissive) {
 		return this.model.query(query,opts);
 	}

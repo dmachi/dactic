@@ -5,7 +5,8 @@ var defer = require("promised-io/promise").defer;
 var EventEmitter = require('events').EventEmitter;
 var util=require("util");
 var introspect = require("introspect");
-
+var uuid = require("uuid");
+var AJV = require("ajv");
 
 var Model = module.exports =  function(store,opts){
 	EventEmitter.call(this);
@@ -74,10 +75,10 @@ Model.prototype.getServiceDescription=function(){
 	}
 
 	for (var prop in this) {
-		console.log("Building SMD Method: ", prop);
+		//console.log("Building SMD Method: ", prop);
 		if (typeof this[prop] == 'function') {
 			var params = introspect(this[prop])
-			console.log("    Method Params: ", params);
+			//console.log("    Method Params: ", params);
 			if (params[params.length-1]=="/*expose*/") {
 				smd.services[prop] = {
 					type: "method",
@@ -101,7 +102,7 @@ Model.prototype.getServiceDescription=function(){
 		}
 	}
 
-	console.log("SERVICE DESC: ", smd);
+	//console.log("SERVICE DESC: ", smd);
 	this.serviceDescription = smd;
 	return this.serviceDescription;
 }
@@ -131,7 +132,7 @@ Model.prototype.mixinObject=function(object,updated){
 
 
 		if ((typeof object[prop]=="undefined") && (typeof updated[prop]=='undefined') ){
-			console.log("Missing Required Property: ", propDef);
+			//console.log("Missing Required Property: ", propDef);
 			if (typeof propDef['default'] != "undefined") { 
 				out[prop]=propDef['default'];  
 			}
@@ -224,16 +225,70 @@ Model.prototype.get=function(id,opts /*expose*/){
 }
 
 Model.prototype.query=function(query, opts /*expose*/){
-	console.log("BaseModel query()", query);
+	debug("BaseModel query()", query);
 	return this.store.query(query, opts);
 }
 
 Model.prototype.put=function(obj, opts /*expose*/){
-	return this.store.put(obj,opts);
+	var schema = this.getSchema();
+
+	if (schema){
+		//console.log("Schema: ", schema);
+		//console.log("obj: ", obj);
+		try {
+
+			var ajv = new AJV({
+		                v5: true,
+		                allErrors: true,
+		                verbose: true,
+				useDefaults: true
+		        });
+
+			//console.log("call validate");
+		        var valid = ajv.validate(schema,obj);
+			//console.log("Valid: ", valid);
+		} catch(err){
+			console.log("Error Running Validator", err);
+			throw Error("Error Running Validator");
+		}
+
+		if (!valid){
+			//console.log("ajv.errors: ", ajv.errors);
+			//console.log("ajv.errorsText()", ajv.errorsText());
+
+			throw Error(ajv.errorsText());
+		}
+	}
+
+	//console.log("put with overwrite: ", opts.overwrite);
+	return when(this.store.put(obj,opts), function(results){
+		//console.log("this.store.put results: ", results);
+		return results;
+	});
 }
 
 Model.prototype.post=function(obj, opts /*expose*/){
-	return this.store.post(obj,opts);
+	var _self=this;
+	opts=opts||{}
+	//console.log("Model Post: ", obj);
+	if (obj && !obj.id){
+		if (opts && opts.id) {
+			obj.id = opts.id;
+			//console.log("Generating New PatientUser with ID: ", obj.id);
+		}else{
+			obj.id = uuid.v4();
+		}
+		
+		return when(_self.put(obj,opts), function(res){
+			//console.log("model post() self.put() results: ", res);
+			return res;
+		},function(err){
+			console.log("Error Creating User: ", err);
+		});
+
+	}else{
+		return new errors.BadRequest();
+	}
 }
 	
 Model.prototype['delete']=function(id, opts /*expose*/){

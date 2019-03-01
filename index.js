@@ -45,7 +45,6 @@ serializationMiddleware = [
 	function(req,res,next){
 		if (res.results) {
 			res.media = findBestMedia(req.headers.accept || "text/json",res.results,{req:req,res:res});	
-			// console.log("Serialization: ", res.media);
 			res.set("content-type",res.media['content-type']);
 			debug("Serialize to ", res.media['content-type'], res.results.getData());
 			var serialized = res.media.serialize(res.results, {req:req,res:res});
@@ -277,8 +276,11 @@ module.exports = function(dataModel){
 
 
 	router.post('/:model[/]',[
-		bodyParser.urlencoded(),
-		bodyParser.json({limit: 20000, type: "application/jsonrpc+json"}),
+		function(req,res,next){
+			next();
+		},
+		bodyParser.urlencoded({extended: false}),
+		bodyParser.json({limit: 20000, type: ["application/jsonrpc+json","application/jsonrequest"]}),
 		bodyParser.json({limit: 20000}),
 		function(req,res,next) {
 			//("DME post /:model/", req.body);	
@@ -299,7 +301,7 @@ module.exports = function(dataModel){
 				req.apiOptions = {};
 			}
 
-			//("req.apiParams: ", req.apiParams, "is Array: ", req.apiParams instanceof Array);
+			//console.log("req.apiParams: ", req.apiParams, "is Array: ", req.apiParams instanceof Array);
 			next();
 		},
 		dataModel.middleware,
