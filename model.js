@@ -234,12 +234,13 @@ Model.prototype.query=function(query, opts /*expose*/){
 }
 
 Model.prototype.put=function(obj, opts /*expose*/){
+	console.log("Model Put: ", obj);
 	var schema = this.getSchema();
 
 	if (schema){
 		//console.log("Schema: ", schema);
 		//console.log("obj: ", obj);
-	try {
+		try {
 
 			var ajv = new AJV({
 		                v5: true,
@@ -259,8 +260,7 @@ Model.prototype.put=function(obj, opts /*expose*/){
 		if (!valid){
 			//console.log("ajv.errors: ", ajv.errors);
 			//console.log("ajv.errorsText()", ajv.errorsText());
-
-			throw Error(ajv.errorsText());
+			throw new Error(ajv.errorsText());
 		}
 	}
 
@@ -296,14 +296,16 @@ Model.prototype.post=function(obj, opts /*expose*/){
 
 Model.prototype.patch=function(id,patch,opts /*expose*/){
 	var _self=this;
-	return when(_self.get(id), function(result){
+	opts=opts||{};
+	return when(_self.get(id,opts), function(result){
 		var obj = result.getData();
 		//console.log("Patching: ", obj);
         	patch.forEach(function(p){
                 	jsonpatch.apply(obj,p);
         	})		
 		//console.log("Patched: ",obj);
-		return _self.put(obj,{overwrite:true})	
+		opts.overwrite=true;
+		return _self.put(obj,opts);
 	}, function(err){
 		return new errors.NotFound();
 	});

@@ -67,7 +67,7 @@ Facet.prototype.init=function(){
 	
 					debug("svcParams: ", svcParams);
 				}else{
-					debug("Facet Method Exists for " + method + ", but does not include an /*exposed*/ comment");
+					debug("Facet Method Exists for " + method + ", but does not include an /*expose*/ comment");
 				}	
 			}else{
 				debug("\tNot Found remove from Facet SMD: " + method);

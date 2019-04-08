@@ -33,6 +33,8 @@ var middleware = [
 			req.query="";
 		}
 
+		console.log("req.query: ", req.query);
+
 		next();
 	},
 
@@ -64,6 +66,8 @@ serializationMiddleware = [
 		next();
 	},
 	function(req,res,next){
+		console.log("res.results serialization: ", res.results);
+
 		if (res.results) {
 			res.media = findBestMedia(req.headers.accept || "text/json",res.results,{req:req,res:res});	
 		
@@ -311,7 +315,7 @@ module.exports = function(dataModel){
 			debug("req.query: ", req.query);
 			req.apiParams=req.query?[req.query]:[];
 			req.apiOptions = {};
-			console.log("QUERY/:model/ Template: ", req.templateId, req.templateStyle);
+			console.log("QUERY/:model/ Template: ", req.templateId, req.templateStyle, req.apiParams);
 			//("Query /:model/", req.params.model, req.templateId, req.templateStyle, req.apiParams);
 			next();
 		},
@@ -321,7 +325,7 @@ module.exports = function(dataModel){
 
 	router.post("/:model/:id", [
 		function(req,res,next){
-			//console.log("PATCH HANDLER");
+			console.log("PATCH HANDLER");
 			next();
 		},
 		bodyParser.json({limit:"10mb",type: "application/json-patch+json"}),
@@ -356,6 +360,10 @@ module.exports = function(dataModel){
 
 	router.post("/:model[/]", [
 		function(req,res,next){
+			console.log("post handler");
+			next();
+		},
+		function(req,res,next){
 			if (req.headers && req.headers["content-type"]) {
 				//console.log("Dactic Model Deserializer POST content-type: ", req.headers["content-type"]);
 				var deserializer = findDeserializer(req.headers["content-type"]);
@@ -378,6 +386,7 @@ module.exports = function(dataModel){
 
 	router.post('/:model[/]',[
 		function(req,res,next){
+			console.log("JSON RPC Handler");
 			next();
 		},
 		bodyParser.urlencoded({extended: false}),
@@ -385,6 +394,7 @@ module.exports = function(dataModel){
 		bodyParser.json({limit: 20000}),
 		function(req,res,next) {
 			//("DME post /:model/", req.body);	
+			console.log("JSON RPC request");
 			req.apiModel = req.params.model;
 			if (req.body.jsonrpc){
 				req.headers.accept="application/json+jsonrpc";
@@ -413,6 +423,24 @@ module.exports = function(dataModel){
 		bodyParser.json({limit: 20000}),
 		dataModel.middleware
 	]); 
+
+	router["delete"]("/:model/:id", [
+                function(req, res,next) {
+                        req.apiModel = req.params.model;
+                        req.apiMethod = "delete";
+                        req.apiParams=[req.params.id];
+                        console.log("DELETE /:model/:id Template: ", req.templateId);
+                        next();
+                },
+		dataModel.middleware,
+		serializationMiddleware
+		//function(req,res,next){
+		//	console.log("DELET res.results: ", res.results);
+		//	res.status(201).end();
+		//}
+	]); 
+
+
 
 	return router;
 }
