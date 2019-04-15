@@ -20,20 +20,16 @@ var middleware = [
 			var parsed = querystring.parse(url.query);
 			Object.keys(parsed).forEach(function(key){
 				if (key.match("http_")) {
-					//console.log("key: ", key);
 					var header = key.split("_")[1];
 					req.headers[header] = parsed[key];
 					var regex = new RegExp("[&]" + key + "=" + parsed[key]);
 					url.query = url.query.replace(regex,"");
-					//console.log("Updated Query: ", url.query);
 				}
 			});
 			req.query = url.query; 
 		}else{
 			req.query="";
 		}
-
-		console.log("req.query: ", req.query);
 
 		next();
 	},
@@ -50,12 +46,10 @@ var middleware = [
 serializationMiddleware = [
 	function(req,res,next){
 		if (res.results && res.results.metadata){
-			//console.log("Result meta: ", res.results.metadata);
 			if (typeof res.results.metadata.totalCount != "undefined"){
 				var start = res.results.metadata.start || 0;
 				var count = res.results.metadata.count || res.results.getData().length;
 				var total = res.results.metadata.totalCount || 0;
-				//console.log("set content range total: ", total);
 				res.set({
 					"content-range": "items " + start + "-" + (start+count) + "/" + total
 				});			
@@ -66,18 +60,14 @@ serializationMiddleware = [
 		next();
 	},
 	function(req,res,next){
-		console.log("res.results serialization: ", res.results);
-
 		if (res.results) {
 			res.media = findBestMedia(req.headers.accept || "text/json",res.results,{req:req,res:res});	
 		
 			res.set("content-type",res.media['content-type']);
-			//console.log("serialize to: ", res.media['content-type']);
 			debug("Serialize to ", res.media['content-type'], "Metadata: ", res.results.metadata);
 			var serialized = res.media.serialize(res.results, {req:req,res:res});
 			
 			when(serialized, function(out) {
-				//console.log("Serialized: ", out);
 				if (req.headers && req.headers.download){
 					var parts = res.media['content-type'].split("/")
 					var ext = parts[parts.length-1];
@@ -88,7 +78,6 @@ serializationMiddleware = [
 				}
 
 				if ((out instanceof ReadStream) || (out && out.stream)){
-					//console.log("Serialized ReadStream");
 					out.pipe(res);
 				}else{
 					res.end(out);
@@ -230,7 +219,6 @@ module.exports = function(dataModel){
 
 	router.get('/resource/smd', [
 		function(req,res,next){
-			//console.log("GET SMD");
 			next();
 		},
 		function(req,res,next){
@@ -325,7 +313,6 @@ module.exports = function(dataModel){
 
 	router.post("/:model/:id", [
 		function(req,res,next){
-			console.log("PATCH HANDLER");
 			next();
 		},
 		bodyParser.json({limit:"10mb",type: "application/json-patch+json"}),
@@ -342,7 +329,6 @@ module.exports = function(dataModel){
 
 	router.patch("/:model/:id", [
 		function(req,res,next){
-			//console.log("PATCH HANDLER");
 			next();
 		},
 		bodyParser.json({limit:"10mb",type: "application/json-patch+json"}),
@@ -360,12 +346,10 @@ module.exports = function(dataModel){
 
 	router.post("/:model[/]", [
 		function(req,res,next){
-			console.log("post handler");
 			next();
 		},
 		function(req,res,next){
 			if (req.headers && req.headers["content-type"]) {
-				//console.log("Dactic Model Deserializer POST content-type: ", req.headers["content-type"]);
 				var deserializer = findDeserializer(req.headers["content-type"]);
 				if (!deserializer) {
 					return next("route");
@@ -374,7 +358,6 @@ module.exports = function(dataModel){
 				req.apiMethod = "post"
 				req.apiParams = deserializer(req);
 
-				//console.log("Deserializer: ", deserializer);
 				next();
 			}else{
 				next("route");		
@@ -386,7 +369,6 @@ module.exports = function(dataModel){
 
 	router.post('/:model[/]',[
 		function(req,res,next){
-			console.log("JSON RPC Handler");
 			next();
 		},
 		bodyParser.urlencoded({extended: false}),
@@ -394,7 +376,6 @@ module.exports = function(dataModel){
 		bodyParser.json({limit: 20000}),
 		function(req,res,next) {
 			//("DME post /:model/", req.body);	
-			console.log("JSON RPC request");
 			req.apiModel = req.params.model;
 			if (req.body.jsonrpc){
 				req.headers.accept="application/json+jsonrpc";
@@ -412,7 +393,6 @@ module.exports = function(dataModel){
 				req.apiOptions = {};
 			}
 
-			//console.log("req.apiParams: ", req.apiParams, "is Array: ", req.apiParams instanceof Array);
 			next();
 		},
 		dataModel.middleware,
@@ -434,10 +414,6 @@ module.exports = function(dataModel){
                 },
 		dataModel.middleware,
 		serializationMiddleware
-		//function(req,res,next){
-		//	console.log("DELET res.results: ", res.results);
-		//	res.status(201).end();
-		//}
 	]); 
 
 

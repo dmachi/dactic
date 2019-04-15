@@ -10,10 +10,8 @@ module.exports.findDeserializer=function(type){
 	var deserializer;
 
 	if (MediaHandlers.some(function(h){
-		console.log("Check Media: ", type, h);
 		if ((h["content-type"]==type) && h.deserialize){
 			deserializer=h.deserialize;
-			console.log("Found deserializer match: ", h);
 			return true;
 		}
 	})) {
@@ -51,19 +49,14 @@ module.exports.findBestMedia = function(type,results,options){
 	var media;
 	var matchConf=0;
 	debug("Find Best Media: ", type);
-	console.log("MediaHandlers: ", MediaHandlers);
 	MediaHandlers.some(function(m){
-		console.log("Inspecting Media Handler: ", m);
 		if (m.checkMedia){
-			console.log("Call serializer checkMedia()");
 			var conf = m.checkMedia(type,results,options);
-			console.log("  checkMedia Results: ", conf);
 			if (conf > matchConf){
 				media=m;
 				matchConf=conf;
 			}
 		}else {
-			console.log("Searching accepts....");
 			Object.keys(accepts).some(function(qscore){
 				debug("Checking accepts with qscore: ", qscore,m['content-type'], "Match: ", accepts[qscore].indexOf(m['content-type']) );
 				if (accepts[qscore].some(function(t){

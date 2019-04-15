@@ -37,14 +37,11 @@ addMedia({
 			results=""
 		}
 	
-		console.log("Results to Serialize: ", results);
 		if (results instanceof Array){
 			var out = [];
 			var props = getProperties(results);
 			out.push(props.join("\t"));
-			console.log("Props: ", props);
 			results.forEach(function(item){
-				console.log("item: ", item);
 				var row = []
 				props.forEach(function(prop){
 					row.push(toColumn(item[prop]));

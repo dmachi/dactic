@@ -13,7 +13,6 @@ function DataModel(options) {
 	var self=this;
 
 	this.use(function(req,res,next){
-		console.log("req.apiModel: ", req.apiModel);
 		if (!req.apiModel ) { //|| !self.model[req.apiModel]){
 			throw Error("Missing API Method");
 		}

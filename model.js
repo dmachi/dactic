@@ -106,7 +106,6 @@ Model.prototype.getServiceDescription=function(){
 		}
 	}
 
-	//console.log("SERVICE DESC: ", smd);
 	this.serviceDescription = smd;
 	return this.serviceDescription;
 }
@@ -136,7 +135,6 @@ Model.prototype.mixinObject=function(object,updated){
 
 
 		if ((typeof object[prop]=="undefined") && (typeof updated[prop]=='undefined') ){
-			//console.log("Missing Required Property: ", propDef);
 			if (typeof propDef['default'] != "undefined") { 
 				out[prop]=propDef['default'];  
 			}
@@ -234,12 +232,9 @@ Model.prototype.query=function(query, opts /*expose*/){
 }
 
 Model.prototype.put=function(obj, opts /*expose*/){
-	console.log("Model Put: ", obj);
 	var schema = this.getSchema();
 
 	if (schema){
-		//console.log("Schema: ", schema);
-		//console.log("obj: ", obj);
 		try {
 
 			var ajv = new AJV({
@@ -249,9 +244,7 @@ Model.prototype.put=function(obj, opts /*expose*/){
 				useDefaults: true
 		        });
 
-			//console.log("call validate");
 		        var valid = ajv.validate(schema,obj);
-			//console.log("Valid: ", valid);
 		} catch(err){
 			console.log("Error Running Validator", err);
 			throw Error("Error Running Validator");
@@ -264,9 +257,7 @@ Model.prototype.put=function(obj, opts /*expose*/){
 		}
 	}
 
-	//console.log("put with overwrite: ", opts.overwrite);
 	return when(this.store.put(obj,opts), function(results){
-		//console.log("this.store.put results: ", results);
 		return results;
 	});
 }
@@ -299,11 +290,9 @@ Model.prototype.patch=function(id,patch,opts /*expose*/){
 	opts=opts||{};
 	return when(_self.get(id,opts), function(result){
 		var obj = result.getData();
-		//console.log("Patching: ", obj);
         	patch.forEach(function(p){
                 	jsonpatch.apply(obj,p);
         	})		
-		//console.log("Patched: ",obj);
 		opts.overwrite=true;
 		return _self.put(obj,opts);
 	}, function(err){

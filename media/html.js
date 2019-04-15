@@ -14,7 +14,6 @@ var resolveTemplate = function(templateId,objId,templateStyle) {
 		debug("Failed to find: ", search);
 		if (objId) {
 			search = Path.join("views", templateId)+(templateStyle?("-"+templateStyle):"") + ".ejs";
-			console.log("Searching for ", search);
 			fs.exists(search, function(exists){
 				if (exists) { return def.resolve(templateId + (templateStyle?("-"+templateStyle):"")); }
 				def.reject(new Error("Unable to Resolve Template " + templateId));
@@ -33,7 +32,7 @@ addMedia({
 	"content-type":"text/html", 
 	serialize: function(obj,opts){
 		var def = new defer();
-		console.log("Attempt to Resolve Template for: ", opts.req.template, ((obj&&obj.id)?obj.id:""),opts.req.templateStyle||"");
+		debug("Attempt to Resolve Template for: ", opts.req.template, ((obj&&obj.id)?obj.id:""),opts.req.templateStyle||"");
 		var resolvedTemplate = resolveTemplate(opts.req.templateId,((obj&&obj.id)?obj.id:"") ,opts.req.templateStyle||"")
 		debug("Resolved Template: ", resolvedTemplate);
 		when(resolvedTemplate, function(resolvedTemplate){
