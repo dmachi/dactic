@@ -45,18 +45,19 @@ var middleware = [
 
 serializationMiddleware = [
 	function(req,res,next){
-		if (res.results && res.results.metadata){
-			if (typeof res.results.metadata.totalCount != "undefined"){
-				var start = res.results.metadata.start || 0;
-				var count = res.results.metadata.count || res.results.getData().length;
-				var total = res.results.metadata.totalCount || 0;
-				res.set({
-					"content-range": "items " + start + "-" + (start+count) + "/" + total
-				});			
-			}
-	
-		}
+                var meta = res.results.getMetadata();
+                if (res.results && meta){
+                        if (typeof meta.totalCount != "undefined"){
+                                var start = meta.start || 0;
+                                var count = meta.count || res.results.getData().length;
+				var end = res.results.metadata.end || (start + count -1);
+                                var total = meta.totalCount || 0;
+                                res.set({
+                                        "content-range": "items " + start + "-" + end + "/" + total
+                                });
+                        }
 
+                }
 		next();
 	},
 	function(req,res,next){
