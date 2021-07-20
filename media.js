@@ -41,7 +41,10 @@ module.exports.findBestMedia = function(type,results,options){
 		});
 		if (!qscore) { qscore="1" };
 		debug("Set qscore: ", qscore, types);
-		accepts[qscore]=types;
+                if (!accepts[qscore]){
+                        accepts[qscore]=[];
+                }
+                accepts[qscore]=accepts[qscore].concat(types);
 	});
 
 	debug("accept types: ", accepts);
